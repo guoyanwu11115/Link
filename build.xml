@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- project 元素
+    1.name:project元素名称
+    2.default:默认执行target
+    3.basedir:指定及路径.若没有指定，默认构建文件build.xml的父目录作为基准目录
+    4.ant -projecthelp 获取所有target名称
+-->
+<project name="Link" default="main"  basedir=".">
+    <description>Ant Study</description>
+    <!-- property元素：作为参量或者参数定义，project属性可通过property元素设定，可以在Ant之外设定
+        若要在外部引入某文件，如<property file="build.properties"></property> ；
+        property元素可作为task的属性值。将属性名放在"${}"中间，并放在task属性值的位置来实现；
+        Ant提供了一些内置属性，与java文档中System.getProperties()方法得到的属性一直:
+        如：
+        basedir：基目录
+        ant.file:build.xml的绝对路径
+        ant.version:ant版本
+        ant.project.name:当前project的name
+     -->
+    <property name="build" location="build"></property>
+    <property name="count" value="111"></property>
+    <property file="build.properties"></property>
+    <!-- target 元素：可包含一个或多个任务target。多个target可以存在相互依赖关系
+        1.name:target元素名称，在一个project元素中是唯一的。
+        2.depends:描述target元素之间依赖，若与多个target存在依赖，需要已“，”隔开。Ant会按照depends中target出现顺序，依次执行每个target
+        3.if:验证指定的属性是否存在，若不存在，所在target将不会执行
+        4.unless:与if正好相反，若验证指定的属性不存在，所在target将会执行
+        5.description：关于target功能的简短描述和说明
+        6.
+    -->
+    <target name="main" if="ant.java.version" description="新建build 编译directory">
+        <tstamp/>
+        <echo message="into target main"></echo>
+        <mkdir dir="${build}"></mkdir>
+        <antcall target="studyProperty"></antcall>
+        <antcall target="copy"></antcall>
+        <antcall target="delete"></antcall>
+        <antcall target="mkdir"></antcall>
+        <antcall target="move"></antcall>
+    </target>
+
+    <target name="studyProperty"  description="学习property标签" >
+        <echo message="into target studyProperty"></echo>
+        <echo message="basedir:${basedir}"></echo>
+        <echo message="count:${count}"></echo>
+        <echo message="sex:${sex}"></echo>
+        <echo message="width:${width}"></echo>
+    </target>
+    <!-- Ant常用任务 -->
+    <target name="copy"  description="对文件或者目录复制">
+        <echo message="into target copy"></echo>
+        <copy file="./pom.xml" tofile="./build/pom.xml"></copy>
+        <copy file="./pom.xml" tofile="./build/copyPom.xml"></copy>
+    </target>
+    <target name="delete"  description="对文件或者目录删除">
+        <echo message="into target delete"></echo>
+        <mkdir dir="build1"></mkdir>
+        <copy file="./pom.xml" tofile="./build1/copyPom1.xml"></copy>
+        <copy file="./pom.xml" todir="./build1"></copy>
+        <copy file="pom.xml" tofile="./build1/pom.xml.bak"></copy>
+        <delete dir="copyPom1.xml"></delete>
+        <delete includeemptydirs="true">
+            <fileset dir="." includes="**/*.bak"/>
+        </delete>
+    </target>
+    <target name="mkdir" description="创建目录">
+        <echo message="into target mkdir"></echo>
+        <mkdir dir="build2"/>
+    </target>
+    <target name="move" description="移动文件或目录">
+        <echo message="into target move"></echo>
+        <mkdir dir="build3"></mkdir>
+        <move file="./build/pom.xml" tofile="./build3/pomMove.xml"></move>
+        <move file="./build/pom.xml" todir="./build3"></move>
+        <!--<move todir="build">-->
+            <!--<fileset dir="build3"></fileset>-->
+        <!--</move>-->
+    </target>
+
+
+</project>

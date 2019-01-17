@@ -17,9 +17,22 @@
         ant.version:ant版本
         ant.project.name:当前project的name
      -->
-    <property name="build" location="build"></property>
+
+    <property name="project" value="Link"></property>
+    <property name="src.dir" value="src/main/java"></property>
+    <property name="web.root" value="src/main/webapp"></property>
+    <property name="lib.dir" value="target/dependency"></property>
+
+    <property name="build.dir" value="build/classes"></property>
+    <property name="doc.dir" value="build/doc"></property>
+
+
     <property name="count" value="111"></property>
     <property file="build.properties"></property>
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar" />
+    </path>
     <!-- target 元素：可包含一个或多个任务target。多个target可以存在相互依赖关系
         1.name:target元素名称，在一个project元素中是唯一的。
         2.depends:描述target元素之间依赖，若与多个target存在依赖，需要已“，”隔开。Ant会按照depends中target出现顺序，依次执行每个target
@@ -31,12 +44,14 @@
     <target name="main" if="ant.java.version" description="新建build 编译directory">
         <tstamp/>
         <echo message="into target main"></echo>
-        <mkdir dir="${build}"></mkdir>
-        <antcall target="studyProperty"></antcall>
-        <antcall target="copy"></antcall>
-        <antcall target="delete"></antcall>
-        <antcall target="mkdir"></antcall>
-        <antcall target="move"></antcall>
+        <!--<mkdir dir="${build}"></mkdir>-->
+        <!--<antcall target="studyProperty"></antcall>-->
+        <!--<antcall target="copy"></antcall>-->
+        <!--<antcall target="delete"></antcall>-->
+        <!--<antcall target="mkdir"></antcall>-->
+        <!--<antcall target="move"></antcall>-->
+        <!--<antcall target="echo"></antcall>-->
+        <antcall target="javadoc"/>
     </target>
 
     <target name="studyProperty"  description="学习property标签" >
@@ -76,6 +91,63 @@
             <!--<fileset dir="build3"></fileset>-->
         <!--</move>-->
     </target>
+    <target name="echo" description="根据日志或监控器的级别输出信息">
+        <echo message="into target echo" file="./logs/system.log" append="true"/>
+    </target>
 
+    <target name="clean" description="">
+        <echo message="into target clean"></echo>
+        <delete dir="${build.dir}"></delete>
+    </target>
+    <target name="compile" depends="clean" description="Antde javac任务进行编译">
+        <echo message="into target compile"></echo>
+        <mkdir dir="${build.dir}"/>
+        <javac srcdir="src" destdir="${build.dir}" includeantruntime="false" />
+    </target>
+    <target name="run" depends="compile" description="Ant java任务运行程序">
+        <echo message="into target run"></echo>
+        <java classname="HelloWorld">
+            <classpath>
+                <pathelement path="${build.dir}"/>
+            </classpath>
+        </java>
+    </target>
+    <target name="jar" depends="run" description=" Antde jar任务生成jar文件">
+        <echo message="into target jar"></echo>
+        <delete file="./HelloWorld.jar"></delete>
+        <jar basedir="${build.dir}/classes" destfile="HelloWorld.jar">
+            <!--<manifest>-->
+                <!--<attribute name="main" value="HelloWorld"/>-->
+            <!--</manifest>-->
+        </jar>
+    </target>
+    <target name="war" depends="compile" description=" Ant使用war打包web">
+        <war destfile="build/Link.war" webxml="${web.root}/WEB-INF/web.xml">
+            <fileset dir="${web.root}" includes="**/*.jsp"/>
+            <!--<lib dir="${webapp}/lib"/>-->
+            <classes dir="${build.dir}"></classes>
+        </war>
+    </target>
+    <!-- Ant使用war给Maven项目打war包 -->
+    <!--<target name="warForMaven" depends="compile" description="Ant使用war给Maven项目打war包 ">-->
+        <!--<war destfile="$build/Link.war" webxml="${web.root}/WEB-INF/web.xml">-->
+            <!--<fileset dir="${web.root}" includes="**/*.jsp"/>-->
+            <!--<lib dir="${web.root}/lib"/>-->
+            <!--<classes dir="${build.dir}"></classes>-->
+        <!--</war>-->
+    <!--</target>-->
+    <!--生成Javadoc 文档 -->
+    <target name="javadoc" description="生成Javadoc文档.">
+        <delete dir="${doc.dir}"/>
+        <mkdir dir="${doc.dir}"/>
+        <javadoc destdir="${doc.dir}" windowtitle="${project} Javadoc" use="yes"
+                 linksource="no" splitindex="yes" encoding="UTF-8"
+                 docencoding="UTF-8" locale="zh_CN">
+            <classpath refid="classpath"/>
+            <packageset dir="${src.dir}" defaultexcludes="yes">
+                <include name="com/miphalink/**"/>
+            </packageset>
+        </javadoc>
+    </target>
 
 </project>

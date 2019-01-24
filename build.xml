@@ -22,14 +22,17 @@
     <property name="src.dir" value="src/main/java"></property>
     <property name="web.root" value="src/main/webapp"></property>
     <property name="lib.dir" value="target/dependency"></property>
+    <property name="javacFile" value="D:/Program Files (x86)/Java/jdk1.6.0_45/bin/javac"></property>
+
 
     <property name="build.dir" value="build/classes"></property>
+
     <property name="doc.dir" value="build/doc"></property>
 
 
     <property name="count" value="111"></property>
     <property file="build.properties"></property>
-
+    <!-- 依赖的jar目录 -->
     <path id="classpath">
         <fileset dir="${lib.dir}" includes="**/*.jar" />
     </path>
@@ -99,18 +102,33 @@
         <echo message="into target clean"></echo>
         <delete dir="${build.dir}"></delete>
     </target>
+
+    <!--全量编译-->
     <target name="compile" depends="clean" description="Antde javac任务进行编译">
         <echo message="into target compile"></echo>
         <mkdir dir="${build.dir}"/>
-        <javac srcdir="src" destdir="${build.dir}" includeantruntime="false" />
+        <!--srcdir:java文件所在目录-->
+        <!--destdir：srcdir目录下的java文件编译后的存放路径-->
+        <!--sourcepath：项目全量代码的java文件所在路径-->
+        <!--fork:是否启用外部编译器-->
+        <!--executable:指定外部java编译器路径-->
+        <!--classpath refid:编译依赖包的id-->
+        <javac srcdir="${src.dir}" destdir="${build.dir}" executable="${javacFile}" fork="true" encoding="UTF-8" debug="true"  debuglevel="source,lines,vars"
+               includeantruntime="false">
+            <classpath refid="classpath">
+            </classpath>
+        </javac>
+        <!--<javac srcdir="src" destdir="${build.dir}" includeantruntime="false" />-->
     </target>
     <target name="run" depends="compile" description="Ant java任务运行程序">
         <echo message="into target run"></echo>
         <java classname="HelloWorld">
+            <sysproperty key="file.encoding" value="UTF-8" />
             <classpath>
                 <pathelement path="${build.dir}"/>
             </classpath>
         </java>
+
     </target>
     <target name="jar" depends="run" description=" Antde jar任务生成jar文件">
         <echo message="into target jar"></echo>
